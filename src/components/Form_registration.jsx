@@ -14,7 +14,7 @@ function Form_registration() {
 
   const onSubmit = (data) => {
     console.log(data);
-    navigate('/Personal-account');
+    navigate('/components/Personal_account');
   }
   // const onSubmit = data => {
   //   fetch('/api/registration', {

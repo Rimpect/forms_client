@@ -16,7 +16,7 @@ function App() {
       <Header /> {/* Header будет отображаться на всех страницах */}
       <Routes>
         <Route path="/" element={<Form_registration />} /> {/* Форма регистрации */}
-        <Route path="/personal-cabinet" element={<Personal_account />} /> {/* Личный кабинет */}
+        <Route path="/components/Personal_account" element={<Personal_account />} /> {/* Личный кабинет */}
       </Routes>
       <Footer /> {/* Footer будет отображаться на всех страницах */}
     </Router>
