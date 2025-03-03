@@ -1,7 +1,7 @@
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom'; // Импортируем useNavigate
-function Form_registration() {
+const Form_registration = () =>  {
   const {
     register,
     handleSubmit,

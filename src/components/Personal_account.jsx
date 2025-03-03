@@ -1,6 +1,6 @@
 import React from 'react';
 
-function Personal_аccount() {
+const Personal_аccount = () => {
   return (
     <div>
       <h1>Личный кабинет</h1>
