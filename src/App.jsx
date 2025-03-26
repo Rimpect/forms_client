@@ -9,7 +9,7 @@ import reactLogo from './assets/react.svg'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import viteLogo from '/vite.svg'
 import './App.css'
-
+import React from 'react';
 function App() {
   return (
     <div className="min-h-screen flex flex-col">
