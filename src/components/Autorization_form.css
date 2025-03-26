@@ -1,0 +1,149 @@
+.auth-form {
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 25px;
+    background: var(--form-bg);
+    border-radius: 12px;
+    box-shadow: 0 4px 20px var(--shadow-color);
+    color: var(--text-color);
+    transition: all 0.3s ease;
+  }
+  
+  .auth-form h2 {
+    text-align: center;
+    margin-bottom: 25px;
+    color: var(--heading-color);
+    font-size: 24px;
+  }
+  
+  .form-group {
+    margin-bottom: 20px;
+  }
+  
+  .form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: var(--label-color);
+  }
+  
+  .form-input {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 16px;
+    background: var(--input-bg);
+    color: var(--input-text);
+    transition: all 0.3s;
+  }
+  
+  .form-input:focus {
+    border-color: var(--primary-color);
+    outline: none;
+    box-shadow: 0 0 0 3px var(--focus-glow);
+  }
+  
+  .error-message {
+    display: block;
+    margin-top: 6px;
+    font-size: 14px;
+    color: var(--error-color);
+    animation: fadeIn 0.3s ease;
+  }
+  
+  .server-error {
+    text-align: center;
+    margin: 15px 0;
+    padding: 10px;
+    background-color: var(--error-bg);
+    color: var(--error-color);
+    border-radius: 6px;
+  }
+  
+  .form-actions {
+    display: flex;
+    gap: 15px;
+    margin-top: 25px;
+  }
+  
+  .submit-btn {
+    flex: 1;
+    padding: 14px;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+  
+  .submit-btn:hover {
+    background-color: var(--primary-hover);
+  }
+  
+  .cancel-btn {
+    flex: 1;
+    padding: 14px;
+    background-color: var(--secondary-color);
+    color: var(--secondary-text);
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+  
+  .cancel-btn:hover {
+    background-color: var(--secondary-hover);
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  /* Цветовые переменные для светлой темы */
+  :root {
+    --form-bg: #ffffff;
+    --shadow-color: rgba(0, 0, 0, 0.1);
+    --text-color: #333333;
+    --heading-color: #2c3e50;
+    --label-color: #555555;
+    --border-color: #dddddd;
+    --input-bg: #f9f9f9;
+    --input-text: #333333;
+    --primary-color: #4285f4;
+    --primary-hover: #3367d6;
+    --secondary-color: #f1f1f1;
+    --secondary-text: #333333;
+    --secondary-hover: #e0e0e0;
+    --focus-glow: rgba(66, 133, 244, 0.3);
+    --error-color: #d32f2f;
+    --error-bg: #fde8e8;
+  }
+  
+  /* Темная тема */
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --form-bg: #2d3748;
+      --shadow-color: rgba(0, 0, 0, 0.3);
+      --text-color: #e2e8f0;
+      --heading-color: #ffffff;
+      --label-color: #a0aec0;
+      --border-color: #4a5568;
+      --input-bg: #1a202c;
+      --input-text: #e2e8f0;
+      --primary-color: #4299e1;
+      --primary-hover: #3182ce;
+      --secondary-color: #4a5568;
+      --secondary-text: #e2e8f0;
+      --secondary-hover: #2d3748;
+      --focus-glow: rgba(66, 153, 225, 0.3);
+      --error-color: #fc8181;
+      --error-bg: #442727;
+    }
+  }
