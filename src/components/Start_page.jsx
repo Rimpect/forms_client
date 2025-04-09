@@ -11,4 +11,4 @@ const Start_page = () => {
   );
 }
 
-export default Start_page;
+export default Start_page; 
