@@ -1,14 +1,44 @@
-import React from 'react';
-import './Start_page.css'; 
-const Start_page = () => {
-  return (
-    <div class="flex justify-between items-center bg-blue-500 p-4">
-      <h1>Cтартовая страничка</h1>
-      <p>Добро пожаловать стартовая страничка!</p>
-      
-    </div>
-    
-  );
-}
+// StartPage.js
+import React, { useState } from 'react';
+import Header from './Header';
+import Modal from './Modal_window';
+import Form_registration from './Form_registration';
+import AuthorizationForm from './Autorization_form';
 
-export default Start_page; 
+const Start_Page = () => {
+  const [activeModal, setActiveModal] = useState(null);
+
+  const openModal = (modalType) => {
+    setActiveModal(modalType);
+  };
+
+  const closeModal = () => {
+    setActiveModal(null);
+  };
+
+  return (
+    <div>
+      <Header openModal={openModal} />
+      
+      {/* Остальное содержимое StartPage */}
+
+      <Modal 
+        isOpen={activeModal === 'login'} 
+        onClose={closeModal}
+        title="Авторизация"
+      >
+        <AuthorizationForm onClose={closeModal} />
+      </Modal>
+
+      <Modal 
+        isOpen={activeModal === 'register'} 
+        onClose={closeModal}
+        title="Регистрация"
+      >
+        <Form_registration onClose={closeModal} />
+      </Modal>
+    </div>
+  );
+};
+
+export default Start_Page;

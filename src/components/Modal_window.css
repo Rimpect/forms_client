@@ -1,78 +1,94 @@
 /* Базовые стили модального окна */
 .modal {
-    display: none; /* Скрыто по умолчанию */
+    display: none;
     position: fixed;
-    z-index: 1000;
+    z-index: 1050; /* Увеличиваем z-index */
     left: 0;
     top: 0;
     width: 100%;
     height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
     overflow: auto;
-    background-color: rgba(0, 0, 0, 0.5); /* Полупрозрачный черный фон */
+    touch-action: manipulation; /* Для мобильных устройств */
+}
+
+.modal.show {
+    display: block; /* Показываем модальное окно */
 }
 
 /* Содержимое модального окна */
 .modal-content {
+    position: relative;
     background-color: #fefefe;
-    margin: 10% auto; /* 10% от верха и по центру */
-    padding: 20px;
-    border: 1px solid #888;
+    margin: 10vh auto; /* Отступ сверху */
+    padding: 25px;
     border-radius: 8px;
-    width: 80%; /* Ширина по умолчанию */
-    max-width: 600px; /* Максимальная ширина */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    width: 90%;
+    max-width: 600px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
     animation: modalopen 0.3s;
 }
 
-/* Заголовок модального окна */
+/* Заголовок с улучшенной кнопкой закрытия */
 .modal-header {
+    position: relative; /* Для позиционирования кнопки */
+    padding-bottom: 15px;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #eee;
+}
+
+/* Переработанная кнопка закрытия */
+.close {
+    position: absolute;
+    top: -10px; /* Смещаем выше */
+    right: -10px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #fff;
+    color: #aaa;
+    font-size: 28px;
+    font-weight: bold;
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    padding-bottom: 10px;
-    border-bottom: 1px solid #ddd;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    border: none;
+    z-index: 1100; /* Выше всего */
+    padding: 0;
 }
 
-.modal-header h2 {
-    margin: 0;
+.close:hover {
     color: #333;
+    background: #f5f5f5;
 }
 
-/* Тело модального окна */
+/* Улучшенное тело модального окна */
 .modal-body {
     padding: 15px 0;
+    position: relative; /* Для внутренних элементов */
+    z-index: 1; /* Убедимся, что контент ниже кнопки закрытия */
 }
 
 /* Подвал модального окна */
 .modal-footer {
-    padding-top: 10px;
-    border-top: 1px solid #ddd;
-    text-align: right;
+    padding-top: 15px;
+    margin-top: 15px;
+    border-top: 1px solid #eee;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
 }
 
-/* Кнопка закрытия */
-.close {
-    color: #aaa;
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
-    cursor: pointer;
-}
-
-.close:hover,
-.close:focus {
-    color: black;
-    text-decoration: none;
-}
-
-/* Кнопки в модальном окне */
+/* Улучшенные кнопки */
 .modal-btn {
-    padding: 8px 16px;
-    margin-left: 10px;
+    padding: 10px 20px;
     border: none;
-    border-radius: 4px;
+    border-radius: 6px;
     cursor: pointer;
-    font-size: 14px;
+    font-size: 16px;
+    transition: all 0.2s;
 }
 
 .btn-primary {
@@ -81,23 +97,23 @@
 }
 
 .btn-primary:hover {
-    background-color: #45a049;
+    background-color: #3d8b40;
 }
 
 .btn-secondary {
     background-color: #f1f1f1;
-    color: black;
+    color: #333;
 }
 
 .btn-secondary:hover {
     background-color: #ddd;
 }
 
-/* Анимация открытия модального окна */
+/* Анимация */
 @keyframes modalopen {
     from {
         opacity: 0;
-        transform: translateY(-50px);
+        transform: translateY(-30px);
     }
     to {
         opacity: 1;
@@ -105,10 +121,25 @@
     }
 }
 
-/* Адаптивность для мобильных устройств */
+/* Адаптивность */
 @media screen and (max-width: 600px) {
-    .modal-content {
-        width: 95%;
-        margin: 20% auto;
+    .modal {
+      padding-top: 60px; /* Отступ под хедер */
+      -webkit-overflow-scrolling: touch; /* Инерционный скролл для iOS */
     }
-}
+    
+    .modal-content {
+      width: 95vw; /* Ширина по viewport */
+      margin: 0 auto 20px;
+      padding: 20px 15px;
+    }
+    
+    .close {
+      top: 5px;
+      right: 5px;
+      width: 44px; /* Минимальный размер для тач-устройств */
+      height: 44px;
+      background: #fff !important;
+      box-shadow: 0 0 0 3px rgba(0,0,0,0.1);
+    }
+  }

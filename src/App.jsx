@@ -14,7 +14,6 @@ function App() {
   return (
     <div className="min-h-screen flex flex-col">
     <Router>
-      <Header />
       <Routes>
         <Route path="/" element={<Start_page />} />
         <Route path="/components/Personal_account" element={<Personal_account />} /> 
