@@ -1,22 +1,36 @@
 import React from 'react';
 import { useForm } from 'react-hook-form';
-import { useNavigate } from 'react-router-dom'; // Импортируем useNavigate
-const Form_registration = () =>  {
+import { useNavigate } from 'react-router-dom';
+import ReCAPTCHA from "react-google-recaptcha";
+
+const Form_registration = () => {
   const {
     register,
     handleSubmit,
     watch,
     formState: { errors },
+    setValue,
+    trigger
   } = useForm();
 
+  const recaptchaRef = React.useRef(null);
   const password = watch('password');
-  const navigate = useNavigate(); // Хук для навигации
+  const navigate = useNavigate();
+
   const onSubmit = async (data) => {
     try {
+      if (!data.recaptcha) {
+        alert('Пожалуйста, подтвердите, что вы не робот');
+        return;
+      }
+
       const response = await fetch('http://localhost/forms/api/register.php', {
         method: 'POST',
         credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
         body: JSON.stringify({
           first_name: data.username,
           last_name: data.lastname,
@@ -24,28 +38,40 @@ const Form_registration = () =>  {
           login: data.login,
           password: data.password,
           gender: data.gender,
-          age: data.age
+          age: data.age,
+          recaptcha_token: data.recaptcha
         })
       });
 
-      // Проверяем, что ответ - JSON
-      const contentType = response.headers.get('content-type');
-      if (!contentType?.includes('application/json')) {
-        const text = await response.text();
-        throw new Error(`Сервер вернул не JSON: ${text.substring(0, 100)}...`);
+      const text = await response.text();
+      let result;
+      
+      try {
+        result = JSON.parse(text);
+      } catch (e) {
+        console.error("Invalid JSON:", text);
+        throw new Error("Ошибка сервера: неверный формат данных");
       }
 
-      const result = await response.json();
-      
+      if (!response.ok) {
+        throw new Error(result.message || 'Ошибка сервера');
+      }
+
       if (result.status === 'success') {
         navigate('/components/Personal_account');
       } else {
-        alert(result.message || 'Ошибка регистрации');
+        throw new Error(result.message || 'Ошибка регистрации');
       }
     } catch (error) {
       console.error('Error:', error);
-      alert(error.message || 'Серверная ошибка');
+      alert(error.message);
+      if (recaptchaRef.current) recaptchaRef.current.reset();
     }
+  };
+
+  const onRecaptchaChange = (token) => {
+    setValue('recaptcha', token);
+    trigger('recaptcha');
   };
 
   return (
@@ -143,12 +169,12 @@ const Form_registration = () =>  {
       <br />
       <select id="age" {...register('age')}>
         <option value="">Выберите возраст</option>
-        <option value="18-25">18-25 лет</option>
-        <option value="26-35">26-35 лет</option>
-        <option value="36-45">36-45 лет</option>
-        <option value="46-55">46-55 лет</option>
-        <option value="56-65">56-65 лет</option>
-        <option value="66+">66+ лет</option>
+        <option value="18">18-25 лет</option>
+        <option value="26">26-35 лет</option>
+        <option value="36">36-45 лет</option>
+        <option value="46">46-55 лет</option>
+        <option value="56">56-65 лет</option>
+        <option value="66">66+ лет</option>
       </select>
       <br />
 
@@ -163,6 +189,14 @@ const Form_registration = () =>  {
         <input type="radio" id="female" value="Female" {...register('gender')} />
         <label htmlFor="female">Женский</label>
       </div>
+
+      <ReCAPTCHA
+        ref={recaptchaRef}
+        sitekey="6LfCASErAAAAAMj7ASH-Piu3L_2gKVuEF36gBHb7" // Замените на реальный ключ
+        onChange={onRecaptchaChange}
+      />
+      {errors.recaptcha && <span className="error">Подтвердите, что вы не робот</span>}
+      <br />
 
       <button type="submit">Зарегистрироваться</button>
     </form>
