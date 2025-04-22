@@ -10,7 +10,7 @@ const Form_registration = () =>  {
   } = useForm();
 
   const password = watch('password');
-  const navigate = useNavigate(); // Хук для навигации
+  const navigate = useNavigate();
   const onSubmit = async (data) => {
     try {
       const response = await fetch('http://localhost/forms/api/register.php', {
@@ -28,7 +28,6 @@ const Form_registration = () =>  {
         })
       });
 
-      // Проверяем, что ответ - JSON
       const contentType = response.headers.get('content-type');
       if (!contentType?.includes('application/json')) {
         const text = await response.text();
@@ -141,15 +140,19 @@ const Form_registration = () =>  {
       {/* Возраст */}
       <label htmlFor="age">Возраст:</label>
       <br />
-      <select id="age" {...register('age')}>
-        <option value="">Выберите возраст</option>
-        <option value="18-25">18-25 лет</option>
-        <option value="26-35">26-35 лет</option>
-        <option value="36-45">36-45 лет</option>
-        <option value="46-55">46-55 лет</option>
-        <option value="56-65">56-65 лет</option>
-        <option value="66+">66+ лет</option>
-      </select>
+
+      <input 
+        id="age"
+        type="text" 
+        {...register('age', { 
+          required: 'Поле обязательно для заполнения',
+          pattern: {
+            value: /^\d+$/,
+            message: 'Пожалуйста, введите только цифры'
+          }
+        })}
+        placeholder="Введите ваш возраст"
+      />
       <br />
 
       {/* Пол */}

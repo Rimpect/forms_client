@@ -9,7 +9,7 @@ const AuthorizationForm = ({ onClose }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(''); // Сбрасываем предыдущие ошибки
+    setError('');
     
     try {
       const response = await fetch('http://localhost/forms/api/login.php', {
@@ -19,7 +19,6 @@ const AuthorizationForm = ({ onClose }) => {
         body: JSON.stringify({ login, password })
       });
 
-      // Проверяем, что ответ - JSON
       const contentType = response.headers.get('content-type');
       if (!contentType?.includes('application/json')) {
         throw new Error('Сервер вернул не JSON-ответ');
@@ -28,12 +27,11 @@ const AuthorizationForm = ({ onClose }) => {
       const result = await response.json();
       
       if (result.status === 'success') {
-        // Сохраняем токен, если он есть в ответе
         if (result.token) {
           localStorage.setItem('authToken', result.token);
         }
         navigate('/components/Personal_account');
-        if (onClose) onClose(); // Закрываем модальное окно, если оно есть
+        if (onClose) onClose(); 
       } else {
         setError(result.message || 'Неверный логин или пароль');
       }
@@ -44,7 +42,7 @@ const AuthorizationForm = ({ onClose }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} autoComplete="off">
       <h2>Вход в систему</h2>
       
       <div>

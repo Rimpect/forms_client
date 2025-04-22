@@ -1,4 +1,5 @@
 import React from 'react';
+import Change_theme from './Change_theme';
 
 const Personal_аccount = () => {
   return (
