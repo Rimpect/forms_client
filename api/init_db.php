@@ -24,7 +24,8 @@ try {
 //     password VARCHAR(255) NOT NULL,
 //     gender VARCHAR(255) NOT NULL,
 //     age VARCHAR(255) NOT NULL,
-//     theme VARCHAR(255) DEFAULT 'light'
+//     theme VARCHAR(255) DEFAULT 'light',
+//     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 // );
 
 // CREATE TABLE IF NOT EXISTS posts (
