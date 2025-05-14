@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import ReCAPTCHA from "react-google-recaptcha";
 
-const Form_registration = () => {
+const Form_registration = ({ onClose, onRegisterSuccess }) => {
   const {
     register,
     handleSubmit,
@@ -58,7 +58,19 @@ const Form_registration = () => {
       }
 
       if (result.status === 'success') {
-        navigate('/components/Personal_account');
+        // Сохраняем токен и уведомляем Header
+        if (result.token) {
+          localStorage.setItem('authToken', result.token);
+          if (onRegisterSuccess) {
+            onRegisterSuccess(result.token); // Важно: вызываем колбэк
+          }
+        }
+        
+        // Перенаправляем в личный кабинет
+        // navigate('/components/Personal_account');
+        
+        // Закрываем модальное окно
+        if (onClose) onClose();
       } else {
         throw new Error(result.message || 'Ошибка регистрации');
       }
@@ -82,7 +94,10 @@ const Form_registration = () => {
       <input
         type="text"
         id="username"
-        {...register('username', { required: 'Обязательное поле', minLength: { value: 3, message: 'Минимум 3 символа' } })}
+        {...register('username', { 
+          required: 'Обязательное поле', 
+          minLength: { value: 3, message: 'Минимум 3 символа' } 
+        })}
       />
       {errors.username && <span className="error">{errors.username.message}</span>}
       <br />
@@ -93,7 +108,10 @@ const Form_registration = () => {
       <input
         type="text"
         id="lastname"
-        {...register('lastname', { required: 'Обязательное поле', minLength: { value: 3, message: 'Минимум 3 символа' } })}
+        {...register('lastname', { 
+          required: 'Обязательное поле', 
+          minLength: { value: 3, message: 'Минимум 3 символа' } 
+        })}
       />
       {errors.lastname && <span className="error">{errors.lastname.message}</span>}
       <br />
@@ -104,7 +122,10 @@ const Form_registration = () => {
       <input
         type="text"
         id="login"
-        {...register('login', { required: 'Обязательное поле', minLength: { value: 3, message: 'Минимум 3 символа' } })}
+        {...register('login', { 
+          required: 'Обязательное поле', 
+          minLength: { value: 3, message: 'Минимум 3 символа' } 
+        })}
       />
       {errors.login && <span className="error">{errors.login.message}</span>}
       <br />
@@ -192,7 +213,7 @@ const Form_registration = () => {
 
       <ReCAPTCHA
         ref={recaptchaRef}
-        sitekey="6LfCASErAAAAAMj7ASH-Piu3L_2gKVuEF36gBHb7" // Замените на реальный ключ
+        sitekey="6LfCASErAAAAAMj7ASH-Piu3L_2gKVuEF36gBHb7"
         onChange={onRecaptchaChange}
       />
       {errors.recaptcha && <span className="error">Подтвердите, что вы не робот</span>}
@@ -201,6 +222,6 @@ const Form_registration = () => {
       <button type="submit">Зарегистрироваться</button>
     </form>
   );
-}
+};
 
 export default Form_registration;

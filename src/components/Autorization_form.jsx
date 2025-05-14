@@ -1,47 +1,38 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const AuthorizationForm = ({ onClose }) => {
+const AuthorizationForm = ({ onClose, onLoginSuccess }) => {
   const [login, setLogin] = React.useState('');
   const [password, setPassword] = React.useState('');
   const [error, setError] = React.useState('');
   const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError(''); // Сбрасываем предыдущие ошибки
+ const handleSubmit = async (e) => {
+  e.preventDefault();
+  setError('');
+  
+  try {
+    const response = await fetch('http://localhost/forms/api/login.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ login, password })
+    });
+
+    const result = await response.json();
     
-    try {
-      const response = await fetch('http://localhost/forms/api/login.php', {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ login, password })
-      });
-
-      // Проверяем, что ответ - JSON
-      const contentType = response.headers.get('content-type');
-      if (!contentType?.includes('application/json')) {
-        throw new Error('Сервер вернул не JSON-ответ');
+    if (result.status === 'success') {
+      localStorage.setItem('authToken', result.token);
+      if (onLoginSuccess) {
+        onLoginSuccess(result.token); // Важно: вызываем колбэк
       }
-
-      const result = await response.json();
-      
-      if (result.status === 'success') {
-        // Сохраняем токен, если он есть в ответе
-        if (result.token) {
-          localStorage.setItem('authToken', result.token);
-        }
-        navigate('/components/Personal_account');
-        if (onClose) onClose(); // Закрываем модальное окно, если оно есть
-      } else {
-        setError(result.message || 'Неверный логин или пароль');
-      }
-    } catch (err) {
-      console.error('Ошибка авторизации:', err);
-      setError('Ошибка сервера. Попробуйте позже.');
+      // navigate вызывается в Header после onLoginSuccess
+    } else {
+      setError(result.message || 'Неверный логин или пароль');
     }
-  };
+  } catch (err) {
+    setError('Ошибка соединения');
+  }
+};
 
   return (
     <form onSubmit={handleSubmit}>
