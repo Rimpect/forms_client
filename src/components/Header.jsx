@@ -13,12 +13,13 @@ const Header = () => {
 
   useEffect(() => {
     const token = localStorage.getItem('authToken');
+    console.log('Token from storage:', token); // Для отладки
     setIsAuthenticated(!!token);
   }, []);
 
   const openModal = (modalType) => {
     setActiveModal(modalType);
-    setRegistrationSuccess(false); // Сбрасываем статус успеха при открытии любой модалки
+    setRegistrationSuccess(false);
   };
 
   const closeModal = () => {
@@ -26,24 +27,26 @@ const Header = () => {
   };
 
   const handleLoginSuccess = (token) => {
+    console.log('Login success with token:', token); // Для отладки
     localStorage.setItem('authToken', token);
     setIsAuthenticated(true);
     closeModal();
-    navigate('/components/Personal_account');
+    navigate('/profile');
   };
 
   const handleRegisterSuccess = () => {
     closeModal();
-    setRegistrationSuccess(true); // Устанавливаем флаг успешной регистрации
-    openModal('login'); // Открываем форму входа
+    setRegistrationSuccess(true);
+    openModal('login');
   };
 
   const handleLogout = async () => {
     try {
-      await fetch('/lab_2/api/auth/logout', {
-        method: 'POST',
+      const response = await fetch('/lab_2/api/auth/logout', {
+        method: 'POST', 
         credentials: 'include'
       });
+      if (!response.ok) throw new Error('Logout failed');
       localStorage.removeItem('authToken');
       setIsAuthenticated(false);
       navigate('/');
@@ -80,7 +83,6 @@ const Header = () => {
         </div>
       </div>
 
-      {/* Модальное окно авторизации */}
       <Modal 
         isOpen={activeModal === 'login'} 
         onClose={closeModal}
@@ -97,7 +99,6 @@ const Header = () => {
         />
       </Modal>
 
-      {/* Модальное окно регистрации */}
       <Modal 
         isOpen={activeModal === 'register'} 
         onClose={closeModal}

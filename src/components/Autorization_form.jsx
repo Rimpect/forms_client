@@ -12,28 +12,25 @@ const AuthorizationForm = ({ onClose, onLoginSuccess }) => {
     setError('');
     
     try {
-      // 1. Исправлен endpoint на /login вместо /register
-      const response = await fetch('/lab_2/api/auth/login', { // Убедитесь, что путь правильный
+      const response = await fetch('/lab_2/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ 
-          login, 
-          password 
-        })
+        body: JSON.stringify({ login, password })
       });
 
-        const data = await response.json();
+      const data = await response.json();
 
-    if (data.status === 'success') {
-      localStorage.setItem('authToken', data.token);
-      navigate('/profile'); // Перенаправляем на профиль
-    } else {
-      setError(data.message || 'Ошибка авторизации');
+      if (data.status === 'success') {
+        onLoginSuccess(data.token); // Важно: вызываем колбэк
+        navigate('/profile');
+      } else {
+        setError(data.message || 'Ошибка авторизации');
+      }
+    } catch (err) {
+      setError('Ошибка соединения');
+      console.error('Login error:', err);
     }
-  } catch (err) {
-    setError('Ошибка соединения');
-  }
   };
 
   return (
