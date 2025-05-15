@@ -1,23 +1,83 @@
-import React, { useState } from 'react';
-// import './PersonalAccount.css'; // Создадим файл стилей
+import React, { useState, useEffect } from 'react'; // Правильный импорт
+import './PersonalAccount.css';
 
 const Personal_account = () => {
   const [activeTab, setActiveTab] = useState('profile');
-  
-  // Состояние для данных пользователя
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [theme, setTheme] = useState('light');
 
-  // Загрузка данных пользователя (если нужно)
-  React.useEffect(() => {
-    // Здесь можно добавить запрос к вашему profile.php
-    // fetch('http://localhost/profile.php', { credentials: 'include' })
-    //   .then(...)
-  }, []);
+  useEffect(() => {
+  const fetchProfile = async () => {
+    try {
+      const response = await fetch('http://localhost/forms/api/profile.php', {
+        credentials: 'include'
+      });
+      
+      // Проверяем Content-Type
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        throw new Error('Неверный формат ответа');
+      }
+      
+      const data = await response.json();
+      
+      if (!response.ok || data.status !== 'success') {
+        throw new Error(data.message || 'Ошибка загрузки профиля');
+      }
+      
+      setUserData(data.user);
+      setTheme(data.user.theme || 'light');
+      document.body.className = data.user.theme || 'light';
+      
+    } catch (err) {
+      setError(err.message);
+      console.error('Ошибка загрузки:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  return (
-    <div className="personal-account">
+  fetchProfile();
+}, []);
+  const handleThemeChange = async (newTheme) => {
+  try {
+    const response = await fetch('http://localhost/forms/api/update_theme.php', {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ theme: newTheme })
+    });
+    
+    // Проверка статуса ответа
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    
+    if (data.status === 'success') {
+      setTheme(newTheme);
+      document.body.className = newTheme;
+      
+      // Обновляем данные пользователя
+      setUserData(prev => ({
+        ...prev,
+        theme: newTheme
+      }));
+    } else {
+      throw new Error(data.message || 'Ошибка сохранения темы');
+    }
+  } catch (error) {
+    console.error('Ошибка смены темы:', error);
+    alert('Не удалось сохранить тему: ' + error.message);
+  }
+};
+   return (
+    <div className={`personal-account ${theme}`}>
       <h1>Личный кабинет</h1>
       
       <div className="account-tabs">
@@ -46,26 +106,49 @@ const Personal_account = () => {
           <div className="profile-info">
             {loading && <p>Загрузка данных...</p>}
             {error && <p className="error">{error}</p>}
-            {userData ? (
+            {userData && (
               <>
                 <h2>Мои данные</h2>
                 <p><strong>Имя:</strong> {userData.first_name}</p>
                 <p><strong>Фамилия:</strong> {userData.last_name}</p>
                 <p><strong>Email:</strong> {userData.email}</p>
-                <p><strong>Тема:</strong> {userData.theme}</p>
+                
+                <div className="theme-selector">
+                  <strong>Тема:</strong>
+                  <div className="theme-options">
+                    <label>
+                      <input
+                        type="radio"
+                        name="theme"
+                        value="light"
+                        checked={theme === 'light'}
+                        onChange={() => handleThemeChange('light')}
+                      />
+                      Светлая
+                    </label>
+                    <label>
+                      <input
+                        type="radio"
+                        name="theme"
+                        value="dark"
+                        checked={theme === 'dark'}
+                        onChange={() => handleThemeChange('dark')}
+                      />
+                      Темная
+                    </label>
+                  </div>
+                </div>
               </>
-            ) : (
-              !loading && !error && <p>Добро пожаловать в ваш личный кабинет!</p>
             )}
           </div>
         )}
         
-        {activeTab === 'users' && <UsersList />}
-        {activeTab === 'stats' && <Statistics />}
+        {activeTab === 'users' && <UsersList theme={theme} />}
+        {activeTab === 'stats' && <Statistics theme={theme} />}
       </div>
     </div>
   );
-}
+};
 
 // Компонент списка пользователей (упражнение 1)
 const UsersList = () => {
@@ -118,11 +201,14 @@ const Statistics = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     fetch('http://localhost/forms/api/statistics.php', {
       credentials: 'include'
     })
-      .then(response => response.json())
+      .then(response => {
+        if (!response.ok) throw new Error('Network response was not ok');
+        return response.json();
+      })
       .then(data => {
         if (data.status === 'success') {
           setStats(data.stats);
@@ -137,21 +223,19 @@ const Statistics = () => {
       });
   }, []);
 
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error}</div>;
+  if (!stats) return <div>Нет данных</div>;
+
   return (
     <div className="statistics">
       <h2>Статистика сайта</h2>
-      {loading && <p>Загрузка статистики...</p>}
-      {error && <p className="error">{error}</p>}
-      {stats && (
-        <>
-          <p><strong>Всего пользователей:</strong> {stats.total_users}</p>
-          <p><strong>Зарегистрировано в этом месяце:</strong> {stats.month_users}</p>
-          <p><strong>Последний зарегистрированный пользователь:</strong> 
-            {stats.last_user.first_name} {stats.last_user.last_name} 
-            ({new Date(stats.last_user.created_at).toLocaleDateString()})
-          </p>
-        </>
-      )}
+      <p><strong>Всего пользователей:</strong> {stats.total_users}</p>
+      <p><strong>Зарегистрировано в этом месяце:</strong> {stats.month_users}</p>
+      <p><strong>Последний зарегистрированный пользователь:</strong> 
+        {stats.last_user?.first_name} {stats.last_user?.last_name} 
+        ({stats.last_user?.created_at ? new Date(stats.last_user.created_at).toLocaleDateString() : 'N/A'})
+      </p>
     </div>
   );
 };

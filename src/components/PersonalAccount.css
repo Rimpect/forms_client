@@ -1,0 +1,44 @@
+/* Базовые стили тем */
+body.light {
+  --bg-color: #f5f5f5;
+  --text-color: #333;
+  --primary: #4285f4;
+}
+
+body.dark {
+  --bg-color: #121212;
+  --text-color: #f1f1f1;
+  --primary: #8ab4f8;
+}
+
+body {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  transition: all 0.3s ease;
+}
+
+/* Стили кнопок переключения */
+.theme-controls {
+  display: flex;
+  gap: 10px;
+  margin: 20px 0;
+}
+
+.theme-btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.theme-btn.active {
+  background-color: var(--primary);
+  color: white;
+}
+
+.theme-btn:not(.active) {
+  background-color: var(--bg-color);
+  border: 1px solid var(--text-color);
+  color: var(--text-color);
+}

@@ -1,36 +1,47 @@
 <?php
 header("Content-Type: application/json");
-session_start();
+header("Access-Control-Allow-Origin: http://localhost:5173");
+header("Access-Control-Allow-Credentials: true");
+
 require 'db.php';
+
+// Отключаем вывод любых ошибок в ответ
+error_reporting(0);
+ini_set('display_errors', 0);
 
 $response = ['status' => 'error', 'message' => ''];
 
-if (!isset($_SESSION['user_id'])) {
-    $response['message'] = 'Пользователь не авторизован';
-    echo json_encode($response);
-    exit;
-}
-
 try {
-    $stmt = $pdo->prepare("SELECT * FROM users WHERE id = ?");
+    session_start();
+    
+    if (!isset($_SESSION['user_id'])) {
+        throw new Exception('Пользователь не авторизован', 401);
+    }
+
+    $stmt = $pdo->prepare("SELECT id, first_name, last_name, email, theme FROM users WHERE id = ?");
     $stmt->execute([$_SESSION['user_id']]);
     $user = $stmt->fetch();
 
-    if ($user) {
-        $response['status'] = 'success';
-        $response['user'] = [
+    if (!$user) {
+        throw new Exception('Пользователь не найден', 404);
+    }
+
+    $response = [
+        'status' => 'success',
+        'user' => [
             'id' => $user['id'],
             'first_name' => $user['first_name'],
             'last_name' => $user['last_name'],
             'email' => $user['email'],
-            'theme' => $user['theme']
-        ];
-    } else {
-        $response['message'] = 'Пользователь не найден';
-    }
-} catch (PDOException $e) {
-    $response['message'] = 'Ошибка базы данных: ' . $e->getMessage();
+            'theme' => $user['theme'] ?? 'light'
+        ]
+    ];
+
+} catch (Exception $e) {
+    $response['message'] = $e->getMessage();
+    http_response_code($e->getCode() ?: 500);
 }
 
-echo json_encode($response);
+echo json_encode($response, JSON_UNESCAPED_UNICODE);
+exit;
 ?>
