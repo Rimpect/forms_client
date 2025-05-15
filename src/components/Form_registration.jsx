@@ -24,13 +24,10 @@ const Form_registration = ({ onClose, onRegisterSuccess }) => {
         return;
       }
 
-      const response = await fetch('http://localhost/forms/api/register.php', {
+      const response = await fetch('/lab_2/api/auth/register', {
         method: 'POST',
         credentials: 'include',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           first_name: data.username,
           last_name: data.lastname,

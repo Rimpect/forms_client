@@ -1,21 +1,44 @@
-import React, { useState } from 'react';
-// import './PersonalAccount.css'; // Создадим файл стилей
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const Personal_account = () => {
   const [activeTab, setActiveTab] = useState('profile');
-  
-  // Состояние для данных пользователя
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
-  // Загрузка данных пользователя (если нужно)
-  React.useEffect(() => {
-    // Здесь можно добавить запрос к вашему profile.php
-    // fetch('http://localhost/profile.php', { credentials: 'include' })
-    //   .then(...)
-  }, []);
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const response = await fetch('/lab_2/api/profile', {
+          credentials: 'include'
+        });
+        
+        if (response.status === 401) {
+          navigate('/login');
+          return;
+        }
 
+        const data = await response.json();
+        
+        if (data.status === 'success') {
+          setUserData(data.user);
+        } else {
+          setError(data.message || 'Ошибка загрузки профиля');
+        }
+      } catch (err) {
+        setError('Ошибка соединения');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (activeTab === 'profile') {
+      fetchProfile();
+    }
+  }, [activeTab, navigate]);
+  
   return (
     <div className="personal-account">
       <h1>Личный кабинет</h1>
@@ -73,8 +96,8 @@ const UsersList = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  React.useEffect(() => {
-    fetch('http://localhost/forms/api/users_list.php', {
+  useEffect(() => {
+    fetch('/lab_2/api/users', {
       credentials: 'include'
     })
       .then(response => response.json())
@@ -82,7 +105,7 @@ const UsersList = () => {
         if (data.status === 'success') {
           setUsers(data.users);
         } else {
-          setError(data.message || 'Ошибка загрузки данных');
+          setError(data.message);
         }
         setLoading(false);
       })
@@ -118,8 +141,8 @@ const Statistics = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  React.useEffect(() => {
-    fetch('http://localhost/forms/api/statistics.php', {
+  useEffect(() => {
+    fetch('/lab_2/api/stats', {
       credentials: 'include'
     })
       .then(response => response.json())
@@ -127,7 +150,7 @@ const Statistics = () => {
         if (data.status === 'success') {
           setStats(data.stats);
         } else {
-          setError(data.message || 'Ошибка загрузки статистики');
+          setError(data.message);
         }
         setLoading(false);
       })

@@ -6,7 +6,9 @@ export function Statistics() {
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        fetch('http://localhost/forms/api/statistics.php')
+        fetch('/lab_2/api/stats', {
+          credentials: 'include'
+        })
             .then(response => response.json())
             .then(data => {
                 if (data.status === 'success') {

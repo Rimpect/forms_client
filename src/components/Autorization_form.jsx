@@ -7,32 +7,34 @@ const AuthorizationForm = ({ onClose, onLoginSuccess }) => {
   const [error, setError] = React.useState('');
   const navigate = useNavigate();
 
- const handleSubmit = async (e) => {
-  e.preventDefault();
-  setError('');
-  
-  try {
-    const response = await fetch('http://localhost/forms/api/login.php', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ login, password })
-    });
-
-    const result = await response.json();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
     
-    if (result.status === 'success') {
-      localStorage.setItem('authToken', result.token);
-      if (onLoginSuccess) {
-        onLoginSuccess(result.token); // Важно: вызываем колбэк
-      }
-      // navigate вызывается в Header после onLoginSuccess
+    try {
+      // 1. Исправлен endpoint на /login вместо /register
+      const response = await fetch('/lab_2/api/auth/login', { // Убедитесь, что путь правильный
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ 
+          login, 
+          password 
+        })
+      });
+
+        const data = await response.json();
+
+    if (data.status === 'success') {
+      localStorage.setItem('authToken', data.token);
+      navigate('/profile'); // Перенаправляем на профиль
     } else {
-      setError(result.message || 'Неверный логин или пароль');
+      setError(data.message || 'Ошибка авторизации');
     }
   } catch (err) {
     setError('Ошибка соединения');
   }
-};
+  };
 
   return (
     <form onSubmit={handleSubmit}>
@@ -46,6 +48,7 @@ const AuthorizationForm = ({ onClose, onLoginSuccess }) => {
           value={login}
           onChange={(e) => setLogin(e.target.value)}
           required
+          minLength={3}
         />
       </div>
       
@@ -57,15 +60,40 @@ const AuthorizationForm = ({ onClose, onLoginSuccess }) => {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
+          minLength={6}
         />
       </div>
       
-      {error && <div style={{ color: 'red' }}>{error}</div>}
+      {error && <div className="error-message" style={{ color: 'red', margin: '10px 0' }}>{error}</div>}
       
-      <div>
-        <button type="submit">Войти</button>
+      <div style={{ marginTop: '20px' }}>
+        <button 
+          type="submit" 
+          style={{
+            padding: '8px 16px',
+            marginRight: '10px',
+            backgroundColor: '#007bff',
+            color: 'white',
+            border: 'none',
+            borderRadius: '4px'
+          }}
+        >
+          Войти
+        </button>
         {onClose && (
-          <button type="button" onClick={onClose}>Отмена</button>
+          <button 
+            type="button" 
+            onClick={onClose}
+            style={{
+              padding: '8px 16px',
+              backgroundColor: '#6c757d',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px'
+            }}
+          >
+            Отмена
+          </button>
         )}
       </div>
     </form>

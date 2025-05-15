@@ -2,22 +2,28 @@ import pool from '../config/db.js';
 
 export const getProfile = async (req, res, next) => {
   try {
-    const [users] = await pool.query('SELECT * FROM users WHERE id = ?', [req.session.user_id]);
-    const user = users[0];
+    if (!req.session.user_id) {
+      return res.status(401).json({ 
+        status: 'error',
+        message: 'Не авторизован' 
+      });
+    }
 
-    if (!user) {
-      return res.status(404).json({ message: 'Пользователь не найден' });
+    const [users] = await pool.query(
+      'SELECT id, first_name, last_name, email, theme FROM users WHERE id = ?', 
+      [req.session.user_id]
+    );
+    
+    if (users.length === 0) {
+      return res.status(404).json({ 
+        status: 'error',
+        message: 'Пользователь не найден' 
+      });
     }
 
     res.json({
       status: 'success',
-      user: {
-        id: user.id,
-        first_name: user.first_name,
-        last_name: user.last_name,
-        email: user.email,
-        theme: user.theme
-      }
+      user: users[0]
     });
   } catch (error) {
     next(error);

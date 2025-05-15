@@ -17,7 +17,7 @@ function App() {
       <Header />
       <Routes>
         <Route path="/" element={<Start_page />} />
-        <Route path="/components/Personal_account" element={<Personal_account />} /> 
+        <Route path="/profile" element={<Personal_account />} />
       </Routes>
       <Footer />
     </Router>

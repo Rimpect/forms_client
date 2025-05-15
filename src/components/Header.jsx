@@ -38,10 +38,18 @@ const Header = () => {
     openModal('login'); // Открываем форму входа
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('authToken');
-    setIsAuthenticated(false);
-    navigate('/');
+  const handleLogout = async () => {
+    try {
+      await fetch('/lab_2/api/auth/logout', {
+        method: 'POST',
+        credentials: 'include'
+      });
+      localStorage.removeItem('authToken');
+      setIsAuthenticated(false);
+      navigate('/');
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
   };
 
   return (

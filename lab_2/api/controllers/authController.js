@@ -1,8 +1,5 @@
 import pool from '../config/db.js';
 import bcrypt from 'bcryptjs';
-import axios from 'axios';
-
-const RECAPTCHA_SECRET = '6LfCASErAAAAAHzbmutmVNg8K63beZsdOKI_qXzI';
 
 export const register = async (req, res, next) => {
   try {
@@ -13,20 +10,11 @@ export const register = async (req, res, next) => {
       login,
       password,
       gender,
-      age,
-      recaptcha_token
+      age
     } = req.body;
 
-    // Validate reCAPTCHA
-    const recaptchaUrl = `https://www.google.com/recaptcha/api/siteverify?secret=${RECAPTCHA_SECRET}&response=${recaptcha_token}`;
-    const recaptchaResponse = await axios.post(recaptchaUrl);
-    
-    if (!recaptchaResponse.data.success) {
-      return res.status(400).json({ message: 'Подтвердите, что вы не робот' });
-    }
-
-    // Validate required fields
-    const required = {
+    // Валидация обязательных полей
+    const requiredFields = {
       first_name: 'Имя',
       last_name: 'Фамилия',
       email: 'Email',
@@ -36,51 +24,65 @@ export const register = async (req, res, next) => {
       age: 'Возраст'
     };
 
-    for (const [field, name] of Object.entries(required)) {
+    for (const [field, name] of Object.entries(requiredFields)) {
       if (!req.body[field]) {
-        return res.status(400).json({ message: `Поле ${name} обязательно для заполнения` });
+        return res.status(400).json({ 
+          status: 'error',
+          message: `Поле ${name} обязательно для заполнения` 
+        });
       }
     }
 
-    // Validate email
+    // Валидация email
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      return res.status(400).json({ message: 'Некорректный email' });
+      return res.status(400).json({
+        status: 'error',
+        message: 'Некорректный email'
+      });
     }
 
-    // Validate password
+    // Валидация пароля
     if (password.length < 6) {
-      return res.status(400).json({ message: 'Пароль должен содержать минимум 6 символов' });
+      return res.status(400).json({
+        status: 'error', 
+        message: 'Пароль должен содержать минимум 6 символов'
+      });
     }
 
-    // Validate gender
+    // Валидация пола
     if (!['Male', 'Female'].includes(gender)) {
-      return res.status(400).json({ message: 'Некорректно указан пол' });
+      return res.status(400).json({
+        status: 'error',
+        message: 'Некорректно указан пол'
+      });
     }
 
-    // Check if user exists
+    // Проверка существования пользователя
     const [existingUsers] = await pool.query(
       'SELECT id FROM users WHERE email = ? OR login = ?',
       [email, login]
     );
 
     if (existingUsers.length > 0) {
-      return res.status(409).json({ message: 'Пользователь с таким email или логином уже существует' });
+      return res.status(409).json({
+        status: 'error',
+        message: 'Пользователь с таким email или логином уже существует'
+      });
     }
 
-    // Hash password
+    // Хеширование пароля
     const salt = await bcrypt.genSalt(10);
     const passwordHash = await bcrypt.hash(password, salt);
 
-    // Create user
+    // Создание пользователя
     const [result] = await pool.query(
-      'INSERT INTO users (first_name, last_name, email, login, password, gender, age) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      `INSERT INTO users 
+       (first_name, last_name, email, login, password, gender, age) 
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
       [first_name, last_name, email, login, passwordHash, gender, age]
     );
 
-    // Set session
-    req.session.user_id = result.insertId;
-    req.session.user_ip = req.ip;
-
+    // Успешный ответ
     res.status(201).json({
       status: 'success',
       message: 'Регистрация успешно завершена',
@@ -91,6 +93,7 @@ export const register = async (req, res, next) => {
         email
       }
     });
+
   } catch (error) {
     next(error);
   }
@@ -100,22 +103,43 @@ export const login = async (req, res, next) => {
   try {
     const { login, password } = req.body;
 
+    // Базовая валидация
     if (!login || !password) {
-      return res.status(400).json({ message: 'Логин и пароль обязательны' });
+      return res.status(400).json({
+        status: 'error',
+        message: 'Логин и пароль обязательны'
+      });
     }
 
-    // Find user
-    const [users] = await pool.query('SELECT * FROM users WHERE login = ?', [login]);
+    // Поиск пользователя
+    const [users] = await pool.query(
+      'SELECT * FROM users WHERE login = ?', 
+      [login]
+    );
+    
+    if (users.length === 0) {
+      return res.status(401).json({
+        status: 'error',
+        message: 'Неверный логин или пароль'
+      });
+    }
+
     const user = users[0];
 
-    if (!user || !(await bcrypt.compare(password, user.password))) {
-      return res.status(401).json({ message: 'Неверный логин или пароль' });
+    // Проверка пароля
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      return res.status(401).json({
+        status: 'error',
+        message: 'Неверный логин или пароль'
+      });
     }
 
-    // Set session
+    // Создание сессии
     req.session.user_id = user.id;
     req.session.user_ip = req.ip;
 
+    // Успешный ответ
     res.json({
       status: 'success',
       message: 'Авторизация успешна',
@@ -124,20 +148,28 @@ export const login = async (req, res, next) => {
         first_name: user.first_name,
         last_name: user.last_name,
         email: user.email,
-        theme: user.theme
+        theme: user.theme || 'light' // Значение по умолчанию
       }
     });
+
   } catch (error) {
     next(error);
   }
 };
 
 export const logout = (req, res) => {
-  req.session.destroy(err => {
+  req.session.destroy((err) => {
     if (err) {
-      return res.status(500).json({ message: 'Ошибка при выходе' });
+      return res.status(500).json({
+        status: 'error',
+        message: 'Ошибка при выходе'
+      });
     }
+    
     res.clearCookie('connect.sid');
-    res.json({ success: true, message: 'Вы вышли' });
+    res.json({ 
+      status: 'success',
+      message: 'Вы вышли' 
+    });
   });
 };
