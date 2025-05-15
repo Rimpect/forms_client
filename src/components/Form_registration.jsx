@@ -17,6 +17,19 @@ const Form_registration = ({ onClose, onRegisterSuccess }) => {
   const password = watch('password');
   const navigate = useNavigate();
 
+  // Проверка пароля на сложность
+  const validatePassword = (value) => {
+    const hasUpperCase = /[A-Z]/.test(value);
+    const hasLowerCase = /[a-z]/.test(value);
+    const hasNumber = /[0-9]/.test(value);
+    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(value);
+    
+    if (!(hasUpperCase && hasLowerCase && hasNumber && hasSpecialChar)) {
+      return "Пароль должен содержать заглавные, строчные буквы(латинские), цифры и спецсимволы";
+    }
+    return true;
+  };
+
   const onSubmit = async (data) => {
     try {
       if (!data.recaptcha) {
@@ -55,18 +68,12 @@ const Form_registration = ({ onClose, onRegisterSuccess }) => {
       }
 
       if (result.status === 'success') {
-        // Сохраняем токен и уведомляем Header
         if (result.token) {
           localStorage.setItem('authToken', result.token);
           if (onRegisterSuccess) {
-            onRegisterSuccess(result.token); // Важно: вызываем колбэк
+            onRegisterSuccess(result.token);
           }
         }
-        
-        // Перенаправляем в личный кабинет
-        // navigate('/components/Personal_account');
-        
-        // Закрываем модальное окно
         if (onClose) onClose();
       } else {
         throw new Error(result.message || 'Ошибка регистрации');
@@ -92,8 +99,19 @@ const Form_registration = ({ onClose, onRegisterSuccess }) => {
         type="text"
         id="username"
         {...register('username', { 
-          required: 'Обязательное поле', 
-          minLength: { value: 3, message: 'Минимум 3 символа' } 
+          required: 'Обязательное поле',
+          minLength: { 
+            value: 2, 
+            message: 'Минимум 2 символа' 
+          },
+          maxLength: {
+            value: 15,
+            message: 'Максимум 15 символов'
+          },
+          pattern: {
+            value: /^[A-Za-zА-Яа-яЁё\s-]+$/,
+            message: 'Только буквы, пробелы и дефисы'
+          }
         })}
       />
       {errors.username && <span className="error">{errors.username.message}</span>}
@@ -106,8 +124,19 @@ const Form_registration = ({ onClose, onRegisterSuccess }) => {
         type="text"
         id="lastname"
         {...register('lastname', { 
-          required: 'Обязательное поле', 
-          minLength: { value: 3, message: 'Минимум 3 символа' } 
+          required: 'Обязательное поле',
+          minLength: { 
+            value: 2, 
+            message: 'Минимум 2 символа' 
+          },
+          maxLength: {
+            value: 15,
+            message: 'Максимум 15 символов'
+          },
+          pattern: {
+            value: /^[A-Za-zА-Яа-яЁё\s-]+$/,
+            message: 'Только буквы, пробелы и дефисы'
+          }
         })}
       />
       {errors.lastname && <span className="error">{errors.lastname.message}</span>}
@@ -120,8 +149,15 @@ const Form_registration = ({ onClose, onRegisterSuccess }) => {
         type="text"
         id="login"
         {...register('login', { 
-          required: 'Обязательное поле', 
-          minLength: { value: 3, message: 'Минимум 3 символа' } 
+          required: 'Обязательное поле',
+          minLength: { 
+            value: 6, 
+            message: 'Минимум 6 символов' 
+          },
+          pattern: {
+            value: /^[a-zA-Z0-9_]+$/,
+            message: 'Только латинские буквы, цифры и подчеркивание'
+          }
         })}
       />
       {errors.login && <span className="error">{errors.login.message}</span>}
@@ -136,9 +172,9 @@ const Form_registration = ({ onClose, onRegisterSuccess }) => {
         {...register('email', {
           required: 'Обязательное поле',
           pattern: {
-            value: /^\S+@\S+$/i,
-            message: 'Некорректный email',
-          },
+            value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+            message: 'Некорректный email'
+          }
         })}
       />
       {errors.email && <span className="error">{errors.email.message}</span>}
@@ -152,7 +188,11 @@ const Form_registration = ({ onClose, onRegisterSuccess }) => {
         id="password"
         {...register('password', {
           required: 'Обязательное поле',
-          minLength: { value: 6, message: 'Минимум 6 символов' },
+          minLength: { 
+            value: 8, 
+            message: 'Минимум 8 символов' 
+          },
+          validate: validatePassword
         })}
       />
       {errors.password && <span className="error">{errors.password.message}</span>}
@@ -165,7 +205,8 @@ const Form_registration = ({ onClose, onRegisterSuccess }) => {
         type="password"
         id="password_check"
         {...register('password_check', {
-          validate: (value) => value === password || 'Пароли не совпадают',
+          required: 'Обязательное поле',
+          validate: (value) => value === password || 'Пароли не совпадают'
         })}
       />
       {errors.password_check && <span className="error">{errors.password_check.message}</span>}
@@ -185,7 +226,10 @@ const Form_registration = ({ onClose, onRegisterSuccess }) => {
       {/* Возраст */}
       <label htmlFor="age">Возраст:</label>
       <br />
-      <select id="age" {...register('age')}>
+      <select 
+        id="age" 
+        {...register('age', { required: 'Выберите возраст' })}
+      >
         <option value="">Выберите возраст</option>
         <option value="18">18-25 лет</option>
         <option value="26">26-35 лет</option>
@@ -194,19 +238,32 @@ const Form_registration = ({ onClose, onRegisterSuccess }) => {
         <option value="56">56-65 лет</option>
         <option value="66">66+ лет</option>
       </select>
+      {errors.age && <span className="error">{errors.age.message}</span>}
       <br />
 
       {/* Пол */}
-      <label htmlFor="gender">Пол:</label>
+      <label>Пол:</label>
       <br />
       <div>
-        <input type="radio" id="male" value="Male" {...register('gender')} />
+        <input 
+          type="radio" 
+          id="male" 
+          value="Male" 
+          {...register('gender', { required: 'Выберите пол' })} 
+        />
         <label htmlFor="male">Мужской</label>
       </div>
       <div>
-        <input type="radio" id="female" value="Female" {...register('gender')} />
+        <input 
+          type="radio" 
+          id="female" 
+          value="Female" 
+          {...register('gender', { required: 'Выберите пол' })} 
+        />
         <label htmlFor="female">Женский</label>
       </div>
+      {errors.gender && <span className="error">{errors.gender.message}</span>}
+      <br />
 
       <ReCAPTCHA
         ref={recaptchaRef}

@@ -1,0 +1,69 @@
+/* Общие стили для светлой темы */
+.light {
+  background-color: #ffffff;
+  color: #333333;
+}
+
+.light .account-tabs button {
+  background-color: #f0f0f0;
+  color: #333333;
+  border: 1px solid #ddd;
+}
+
+.light .account-tabs button.active {
+  background-color: #007bff;
+  color: white;
+}
+
+.light .theme-toggle {
+  background-color: #f0f0f0;
+  color: #333333;
+}
+
+.light button[type="submit"] {
+  background-color: #28a745;
+  color: white;
+}
+
+/* Стили для темной темы */
+.dark {
+  background-color: #1a1a1a;
+  color: #f0f0f0;
+}
+
+.dark .account-tabs button {
+  background-color: #333333;
+  color: #f0f0f0;
+  border: 1px solid #555;
+}
+
+.dark .account-tabs button.active {
+  background-color: #0056b3;
+  color: white;
+}
+
+.dark .theme-toggle {
+  background-color: #333333;
+  color: #f0f0f0;
+}
+
+.dark button[type="submit"] {
+  background-color: #218838;
+  color: white;
+}
+
+/* Общие стили для кнопок */
+button {
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+button:hover {
+  opacity: 0.9;
+}
+
+.error {
+  color: #dc3545;
+}

@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import './Personal_account.css'
 
 const Personal_account = () => {
   const [activeTab, setActiveTab] = useState('profile');
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [currentTheme, setCurrentTheme] = useState('light');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -24,6 +26,8 @@ const Personal_account = () => {
         
         if (data.status === 'success') {
           setUserData(data.user);
+          setCurrentTheme(data.user.theme || 'light');
+          applyTheme(data.user.theme || 'light');
         } else {
           setError(data.message || 'Ошибка загрузки профиля');
         }
@@ -38,9 +42,48 @@ const Personal_account = () => {
       fetchProfile();
     }
   }, [activeTab, navigate]);
+
+  const applyTheme = (theme) => {
+    document.body.className = theme;
+    localStorage.setItem('theme', theme);
+  };
+
+ const handleThemeToggle = async () => {
+  const newTheme = currentTheme === 'light' ? 'dark' : 'light';
   
+  try {
+    const response = await fetch('lab_2/api/theme', {  // Убедитесь, что путь правильный
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ theme: newTheme }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    
+    if (data.status === 'success') {
+      setCurrentTheme(newTheme);
+      applyTheme(newTheme);
+      if (userData) {
+        setUserData({ ...userData, theme: newTheme });
+      }
+    } else {
+      setError(data.message || 'Не удалось обновить тему');
+    }
+  } catch (err) {
+    console.error('Error updating theme:', err);
+    setError(`Ошибка: ${err.message}`);
+  }
+};
+
   return (
-    <div className="personal-account">
+    <div className={`personal-account ${currentTheme}`}>
       <h1>Личный кабинет</h1>
       
       <div className="account-tabs">
@@ -61,6 +104,12 @@ const Personal_account = () => {
           onClick={() => setActiveTab('stats')}
         >
           Статистика
+        </button>
+        <button 
+          className="theme-toggle"
+          onClick={handleThemeToggle}
+        >
+          {currentTheme === 'light' ? 'Тёмная тема' : 'Светлая тема'}
         </button>
       </div>
       

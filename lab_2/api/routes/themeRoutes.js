@@ -1,8 +1,9 @@
 import { Router } from 'express';
-import { getStats } from '../controllers/statsController.js';
+import { updateTheme } from '../controllers/themeController.js'; // Исправлено
+import { requireAuth } from '../middlewares/authMiddleware.js';
 
 const router = Router();
 
-router.get('/', getStats);
+router.post('/', requireAuth, updateTheme); // POST /api/theme
 
 export default router;
