@@ -18,11 +18,14 @@ const AuthorizationForm = ({ onClose, onLoginSuccess }) => {
         credentials: 'include',
         body: JSON.stringify({ login, password })
       });
-
+      console.log('Полный ответ:', response);
       const data = await response.json();
-
+      console.log('Данные ответа:', data);
       if (data.status === 'success') {
-        onLoginSuccess(data.token); // Важно: вызываем колбэк
+        // Сохраняем токен в localStorage
+        localStorage.setItem('token', data.token);
+        console.log('Токен сохранен:', data.token); // Проверьте в консоли
+        onLoginSuccess(data.user);
         navigate('/profile');
       } else {
         setError(data.message || 'Ошибка авторизации');
@@ -32,6 +35,7 @@ const AuthorizationForm = ({ onClose, onLoginSuccess }) => {
       console.error('Login error:', err);
     }
   };
+
 
   return (
     <form onSubmit={handleSubmit}>

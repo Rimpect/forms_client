@@ -1,6 +1,19 @@
+import jwt from 'jsonwebtoken';
+import { jwtConfig } from '../config/jwt.js';
+import { generateToken } from '../utils/jwtUtils.js';
 export const requireAuth = (req, res, next) => {
-  if (!req.session.user_id) {
-    return res.status(401).json({ message: 'Пользователь не авторизован' });
+  const token = req.headers.authorization?.split(' ')[1] || req.cookies.jwt;
+  
+  if (!token) {
+    return res.status(401).json({ message: 'Требуется авторизация' });
   }
-  next();
+
+  jwt.verify(token, jwtConfig.secret, (err, decoded) => {
+    if (err) {
+      return res.status(403).json({ message: 'Время токена вышло' });
+    }
+    
+    req.user = decoded; // Сохраняем данные пользователя в запросе
+    next();
+  });
 };

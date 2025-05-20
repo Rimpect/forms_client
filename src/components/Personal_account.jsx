@@ -11,13 +11,22 @@ const Personal_account = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchProfile = async () => {
+const fetchProfile = async () => {
       try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          navigate('/login');
+          return;
+        }
+
         const response = await fetch('/lab_2/api/profile', {
-          credentials: 'include'
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
         });
         
         if (response.status === 401) {
+          localStorage.removeItem('token');
           navigate('/login');
           return;
         }
@@ -50,36 +59,37 @@ const Personal_account = () => {
 
  const handleThemeToggle = async () => {
   const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+  const token = localStorage.getItem('token');
   
-  try {
-    const response = await fetch('lab_2/api/theme', {  // Убедитесь, что путь правильный
-      method: 'POST',
-      credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ theme: newTheme }),
-    });
+    try {
+      const response = await fetch('lab_2/api/theme', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ theme: newTheme }),
+      });
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const data = await response.json();
-    
-    if (data.status === 'success') {
-      setCurrentTheme(newTheme);
-      applyTheme(newTheme);
-      if (userData) {
-        setUserData({ ...userData, theme: newTheme });
+     if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
-    } else {
-      setError(data.message || 'Не удалось обновить тему');
+
+      const data = await response.json();
+    
+      if (data.status === 'success') {
+        setCurrentTheme(newTheme);
+        applyTheme(newTheme);
+        if (userData) {
+          setUserData({ ...userData, theme: newTheme });
+        }
+      } else {
+        setError(data.message || 'Не удалось обновить тему');
+      }
+    } catch (err) {
+      console.error('Error updating theme:', err);
+      setError(`Ошибка: ${err.message}`);
     }
-  } catch (err) {
-    console.error('Error updating theme:', err);
-    setError(`Ошибка: ${err.message}`);
-  }
 };
 
   return (
@@ -146,8 +156,9 @@ const UsersList = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    const token = localStorage.getItem('token');
     fetch('/lab_2/api/users', {
-      credentials: 'include'
+      'Authorization': `Bearer ${token}`
     })
       .then(response => response.json())
       .then(data => {
@@ -191,8 +202,11 @@ const Statistics = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    const token = localStorage.getItem('token');
     fetch('/lab_2/api/stats', {
-      credentials: 'include'
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
     })
       .then(response => response.json())
       .then(data => {

@@ -10,7 +10,18 @@ const Header = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [registrationSuccess, setRegistrationSuccess] = useState(false);
   const navigate = useNavigate();
-
+ useEffect(() => {
+    if (localStorage.getItem('token')) {
+      window.history.pushState(null, null, window.location.href);
+      window.onpopstate = () => {
+        window.history.go(1);
+      };
+    }
+    
+    return () => {
+      window.onpopstate = null;
+    };
+  }, []);
   useEffect(() => {
     const token = localStorage.getItem('authToken');
     console.log('Token from storage:', token); // Для отладки

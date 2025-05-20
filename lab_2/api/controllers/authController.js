@@ -1,6 +1,8 @@
 import pool from '../config/db.js';
 import bcrypt from 'bcryptjs';
-
+import jwt from 'jsonwebtoken';
+import { jwtConfig } from '../config/jwt.js';
+import { generateToken } from '../utils/jwtUtils.js';
 export const register = async (req, res, next) => {
   try {
     const {
@@ -32,6 +34,7 @@ export const register = async (req, res, next) => {
         });
       }
     }
+
 
     // Валидация email
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
@@ -103,7 +106,6 @@ export const login = async (req, res, next) => {
   try {
     const { login, password } = req.body;
 
-    // Базовая валидация
     if (!login || !password) {
       return res.status(400).json({
         status: 'error',
@@ -111,11 +113,7 @@ export const login = async (req, res, next) => {
       });
     }
 
-    // Поиск пользователя
-    const [users] = await pool.query(
-      'SELECT * FROM users WHERE login = ?', 
-      [login]
-    );
+    const [users] = await pool.query('SELECT * FROM users WHERE login = ?', [login]);
     
     if (users.length === 0) {
       return res.status(401).json({
@@ -125,9 +123,8 @@ export const login = async (req, res, next) => {
     }
 
     const user = users[0];
-
-    // Проверка пароля
     const isPasswordValid = await bcrypt.compare(password, user.password);
+
     if (!isPasswordValid) {
       return res.status(401).json({
         status: 'error',
@@ -135,20 +132,25 @@ export const login = async (req, res, next) => {
       });
     }
 
-    // Создание сессии
-    req.session.user_id = user.id;
-    req.session.user_ip = req.ip;
+    const token = generateToken(user.id);
 
-    // Успешный ответ
+    res.cookie('jwt', token, {
+      httpOnly: true,
+      maxAge: 24 * 60 * 60 * 1000, // 1 день
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax'
+    });
+
     res.json({
       status: 'success',
       message: 'Авторизация успешна',
+      token,
       user: {
         id: user.id,
         first_name: user.first_name,
         last_name: user.last_name,
         email: user.email,
-        theme: user.theme || 'light' // Значение по умолчанию
+        theme: user.theme || 'light'
       }
     });
 
@@ -158,18 +160,10 @@ export const login = async (req, res, next) => {
 };
 
 export const logout = (req, res) => {
-  req.session.destroy((err) => {
-    if (err) {
-      return res.status(500).json({
-        status: 'error',
-        message: 'Ошибка при выходе'
-      });
-    }
-    
-    res.clearCookie('connect.sid');
-    res.json({ 
-      status: 'success',
-      message: 'Вы вышли' 
-    });
+  res.clearCookie('jwt');
+  res.json({ 
+    status: 'success',
+    message: 'Вы вышли',
+    clearLocalStorage: true
   });
 };

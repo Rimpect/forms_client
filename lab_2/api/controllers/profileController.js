@@ -2,7 +2,7 @@ import pool from '../config/db.js';
 
 export const getProfile = async (req, res, next) => {
   try {
-    if (!req.session.user_id) {
+    if (!req.user?.id) {
       return res.status(401).json({ 
         status: 'error',
         message: 'Не авторизован' 
@@ -11,7 +11,7 @@ export const getProfile = async (req, res, next) => {
 
     const [users] = await pool.query(
       'SELECT id, first_name, last_name, email, theme FROM users WHERE id = ?', 
-      [req.session.user_id]
+      [req.user.id] // Используем req.user.id вместо req.session.user_id
     );
     
     if (users.length === 0) {

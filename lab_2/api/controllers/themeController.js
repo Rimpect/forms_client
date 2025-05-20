@@ -10,7 +10,7 @@ export const updateTheme = async (req, res, next) => {
 
     await pool.query('UPDATE users SET theme = ? WHERE id = ?', [
       theme,
-      req.session.user_id
+      req.user.id // Заменяем req.session.user_id на req.user.id
     ]);
 
     res.json({ status: 'success', theme });

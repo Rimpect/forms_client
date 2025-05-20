@@ -9,14 +9,16 @@ import usersRoutes from './api/routes/usersRoutes.js';
 import { errorHandler, notFound } from './api/middlewares/errorMiddleware.js';
 
 const app = express();
-
+// app.use(cors({
+//   origin: 'http://localhost:3000',
+//   credentials: true
+// }));
 // Middleware
 app.use(cors({
   origin: 'http://localhost:5173',
   credentials: true
 }));
 app.use(express.json());
-app.use(session);
 
 // Routes
 app.use('/api/auth', authRoutes);
