@@ -24,7 +24,7 @@ const Header = () => {
   }, []);
   useEffect(() => {
     const token = localStorage.getItem('authToken');
-    console.log('Token from storage:', token); // Для отладки
+    console.log('Token from storage:', token); 
     setIsAuthenticated(!!token);
   }, []);
 
@@ -38,7 +38,7 @@ const Header = () => {
   };
 
   const handleLoginSuccess = (token) => {
-    console.log('Login success with token:', token); // Для отладки
+    console.log('Login success with token:', token);
     localStorage.setItem('authToken', token);
     setIsAuthenticated(true);
     closeModal();
@@ -51,21 +51,26 @@ const Header = () => {
     openModal('login');
   };
 
-  const handleLogout = async () => {
-    try {
-      const response = await fetch('/lab_2/api/auth/logout', {
-        method: 'POST', 
-        credentials: 'include'
-      });
-      if (!response.ok) throw new Error('Logout failed');
-      localStorage.removeItem('authToken');
-      setIsAuthenticated(false);
-      navigate('/');
-    } catch (error) {
-      console.error('Logout error:', error);
-    }
-  };
-
+  // const handleLogout = async () => {
+  //   try {
+  //     const response = await fetch('/lab_2/api/auth/logout', {
+  //       method: 'POST', 
+  //       credentials: 'include'
+  //     });
+  //     if (!response.ok) throw new Error('Logout failed');
+  //     localStorage.removeItem('authToken');
+  //     setIsAuthenticated(false);
+  //     navigate('/');
+  //   } catch (error) {
+  //     console.error('Logout error:', error);
+  //   }
+  // };
+const handleLogout = () => {
+  localStorage.removeItem('authToken');
+  setIsAuthenticated(false);
+  navigate('/', { replace: true }); 
+  window.location.reload(); 
+};
   return (
     <header className="header">
       <div className="header-container">
