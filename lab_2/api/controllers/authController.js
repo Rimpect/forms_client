@@ -3,95 +3,29 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { jwtConfig } from '../config/jwt.js';
 import { generateToken } from '../utils/jwtUtils.js';
+
 export const register = async (req, res, next) => {
   try {
-    const {
-      first_name,
-      last_name,
-      email,
-      login,
-      password,
-      gender,
-      age
-    } = req.body;
-
+    const { first_name, last_name, email, login, password, gender, age } = req.body;
     
-    const requiredFields = {
-      first_name: 'Имя',
-      last_name: 'Фамилия',
-      email: 'Email',
-      login: 'Логин',
-      password: 'Пароль',
-      gender: 'Пол',
-      age: 'Возраст'
-    };
-
-    for (const [field, name] of Object.entries(requiredFields)) {
-      if (!req.body[field]) {
-        return res.status(400).json({ 
-          status: 'error',
-          message: `Поле ${name} обязательно для заполнения` 
-        });
-      }
-    }
-
-
-
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      return res.status(400).json({
-        status: 'error',
-        message: 'Некорректный email'
-      });
-    }
-
-    if (password.length < 6) {
-      return res.status(400).json({
-        status: 'error', 
-        message: 'Пароль должен содержать минимум 6 символов'
-      });
-    }
-
-
-    if (!['Male', 'Female'].includes(gender)) {
-      return res.status(400).json({
-        status: 'error',
-        message: 'Некорректно указан пол'
-      });
-    }
-
-    const [existingUsers] = await pool.query(
-      'SELECT id FROM users WHERE email = ? OR login = ?',
-      [email, login]
+    const hashedPassword = await bcrypt.hash(password, 10);
+    
+    await pool.query(
+      'INSERT INTO users (first_name, last_name, email, login, password, gender, age) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      [first_name, last_name, email, login, hashedPassword, gender, age]
     );
-
-    if (existingUsers.length > 0) {
-      return res.status(409).json({
-        status: 'error',
-        message: 'Пользователь с таким email или логином уже существует'
-      });
-    }
-
-    const salt = await bcrypt.genSalt(10);
-    const passwordHash = await bcrypt.hash(password, salt);
-
-    const [result] = await pool.query(
-      `INSERT INTO users 
-       (first_name, last_name, email, login, password, gender, age) 
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [first_name, last_name, email, login, passwordHash, gender, age]
+    
+    const token = jwt.sign(
+      { login, email }, 
+      jwtConfig.secret, 
+      { expiresIn: jwtConfig.expiresIn }
     );
-
-    res.status(201).json({
+    
+    res.status(201).json({ 
       status: 'success',
-      message: 'Регистрация успешно завершена',
-      user: {
-        id: result.insertId,
-        first_name,
-        last_name,
-        email
-      }
+      message: 'Регистрация успешна',
+      token 
     });
-
   } catch (error) {
     next(error);
   }
