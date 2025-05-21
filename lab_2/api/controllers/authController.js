@@ -15,7 +15,7 @@ export const register = async (req, res, next) => {
       age
     } = req.body;
 
-    // Валидация обязательных полей
+    
     const requiredFields = {
       first_name: 'Имя',
       last_name: 'Фамилия',
@@ -36,7 +36,7 @@ export const register = async (req, res, next) => {
     }
 
 
-    // Валидация email
+
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       return res.status(400).json({
         status: 'error',
@@ -44,7 +44,6 @@ export const register = async (req, res, next) => {
       });
     }
 
-    // Валидация пароля
     if (password.length < 6) {
       return res.status(400).json({
         status: 'error', 
@@ -52,7 +51,7 @@ export const register = async (req, res, next) => {
       });
     }
 
-    // Валидация пола
+
     if (!['Male', 'Female'].includes(gender)) {
       return res.status(400).json({
         status: 'error',
@@ -60,7 +59,6 @@ export const register = async (req, res, next) => {
       });
     }
 
-    // Проверка существования пользователя
     const [existingUsers] = await pool.query(
       'SELECT id FROM users WHERE email = ? OR login = ?',
       [email, login]
@@ -73,11 +71,9 @@ export const register = async (req, res, next) => {
       });
     }
 
-    // Хеширование пароля
     const salt = await bcrypt.genSalt(10);
     const passwordHash = await bcrypt.hash(password, salt);
 
-    // Создание пользователя
     const [result] = await pool.query(
       `INSERT INTO users 
        (first_name, last_name, email, login, password, gender, age) 
@@ -85,7 +81,6 @@ export const register = async (req, res, next) => {
       [first_name, last_name, email, login, passwordHash, gender, age]
     );
 
-    // Успешный ответ
     res.status(201).json({
       status: 'success',
       message: 'Регистрация успешно завершена',
@@ -136,7 +131,7 @@ export const login = async (req, res, next) => {
 
     res.cookie('jwt', token, {
       httpOnly: true,
-      maxAge: 24 * 60 * 60 * 1000, // 1 день
+      maxAge: 24 * 60 * 60 * 1000, 
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax'
     });

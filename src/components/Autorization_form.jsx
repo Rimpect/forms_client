@@ -22,9 +22,8 @@ const AuthorizationForm = ({ onClose, onLoginSuccess }) => {
       const data = await response.json();
       console.log('Данные ответа:', data);
       if (data.status === 'success') {
-        // Сохраняем токен в localStorage
         localStorage.setItem('token', data.token);
-        console.log('Токен сохранен:', data.token); // Проверьте в консоли
+        console.log('Токен сохранен:', data.token); 
         onLoginSuccess(data.user);
         navigate('/profile');
       } else {
@@ -38,7 +37,7 @@ const AuthorizationForm = ({ onClose, onLoginSuccess }) => {
 
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} autoComplete="off">
       <h2>Вход в систему</h2>
       
       <div>

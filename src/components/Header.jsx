@@ -67,7 +67,9 @@ const Header = () => {
   // };
 const handleLogout = () => {
   localStorage.removeItem('authToken');
+  localStorage.removeItem('token');
   setIsAuthenticated(false);
+
   navigate('/', { replace: true }); 
   window.location.reload(); 
 };

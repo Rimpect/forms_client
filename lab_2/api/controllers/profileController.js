@@ -11,7 +11,7 @@ export const getProfile = async (req, res, next) => {
 
     const [users] = await pool.query(
       'SELECT id, first_name, last_name, email, theme FROM users WHERE id = ?', 
-      [req.user.id] // Используем req.user.id вместо req.session.user_id
+      [req.user.id]
     );
     
     if (users.length === 0) {

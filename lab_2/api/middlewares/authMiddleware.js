@@ -13,7 +13,7 @@ export const requireAuth = (req, res, next) => {
       return res.status(403).json({ message: 'Время токена вышло' });
     }
     
-    req.user = decoded; // Сохраняем данные пользователя в запросе
+    req.user = decoded; 
     next();
   });
 };

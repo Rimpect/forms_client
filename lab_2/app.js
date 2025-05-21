@@ -1,6 +1,5 @@
 import express from 'express';
 import cors from 'cors';
-import session from './api/config/session.js';
 import authRoutes from './api/routes/authRoutes.js';
 import profileRoutes from './api/routes/profileRoutes.js';
 import statsRoutes from './api/routes/statsRoutes.js';
@@ -20,14 +19,12 @@ app.use(cors({
 }));
 app.use(express.json());
 
-// Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/stats', statsRoutes);
 app.use('/api/theme', themeRoutes);
 app.use('/api/users', usersRoutes);
 
-// Error handling
 app.use(notFound);
 app.use(errorHandler);
 

@@ -1,4 +1,4 @@
-// utils/jwtUtils.js
+
 import jwt from 'jsonwebtoken';
 import { jwtConfig } from '../config/jwt.js';
 
